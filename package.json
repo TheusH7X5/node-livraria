@@ -5,6 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "build": "webpack --config webpack.config.js",
     "start": "node server.js",
     "dev": "nodemon server.js",
     "vercel-build": "npm install && npm run build"
