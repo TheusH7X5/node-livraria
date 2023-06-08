@@ -1,68 +1,59 @@
-import editoras from "../models/Editora.js";
+import {editoras} from "../models/index.js";
 
 class EditoraController {
-  static listarEditoras = (req, res) => {
-    editoras.find((error, editoras) => {
-      if (error) {
-        console.error(error);
-        res.status(500).send("Ocorreu um erro durante a busca de editoras.");
-      } else {
-        res.status(200).json(editoras);
-      }
-    });
+  static listarEditoras = async (req, res, next) => {
+    try {
+      const editorasResultado = await editoras.find();
+      res.status(200).json(editorasResultado);
+    } catch (error) {
+      next(error);
+    }
   };
 
-  static listarEditoraPorId = (req, res) => {
-    const id = req.params.id;
-
-    editoras.findById(id, (error, editoras) => {
-      if (error) {
-        console.error(error);
-        res
-          .status(400)
-          .send({ message: `${error.message} - id do Editora não localizado!` });
-      } else {
-        res.status(200).send(editoras);
-      }
-    });
+  static listarEditoraPorId = async (req, res, next) => {
+    try {
+      const id = req.params.id;
+      const editorasResultado = await editoras.findById(id);
+      res.status(200).send(editorasResultado);
+    } catch (error) {
+      next(error);
+    }
   };
 
-  static cadastrarEditora = (req, res) => {
-    let editora = new editoras(req.body);
-
-    editora.save((err) => {
-      if (err) {
-        res
-          .status(500)
-          .send({ message: `${err.message} - falha ao cadastrar Editora.` });
-      } else {
-        res.status(201).send(editora.toJSON());
-      }
-    });
+  static cadastrarEditora = async (req, res, next) => {
+    try {
+      let editora = new editoras(req.body);
+      const editorasResultado = await editora.save();
+      res.status(201).send(editorasResultado.toJSON());
+    } catch (error) {
+      next(error);
+    }
   };
 
-  static atualizarEditora = (req, res) => {
-    const id = req.params.id;
-
-    editoras.findByIdAndUpdate(id, { $set: req.body }, (err) => {
-      if (!err) {
-        res.status(200).send({ message: "Editora atualizado com sucesso!" });
-      } else {
-        res.status(500).send({ message: err.message });
-      }
-    });
+  static atualizarEditora = async (req, res, next) => {
+    try {
+      const id = req.params.id;
+      const editorasResultado = await editoras.findByIdAndUpdate(id, {
+        $set: req.body,
+      });
+      res.status(200).send({
+        message: `Editora ${editorasResultado.nome} atualizado com sucesso!`,
+      });
+    } catch (error) {
+      next(error);
+    }
   };
 
-  static excluirEditora = (req, res) => {
-    const id = req.params.id;
-
-    editoras.findByIdAndDelete(id, (err) => {
-      if (!err) {
-        res.status(200).send({ message: `Editora ${id} removido com sucesso!` });
-      } else {
-        res.status(500).send({ message: err.message });
-      }
-    });
+  static excluirEditora = async (req, res, next) => {
+    try {
+      const id = req.params.id;
+      const editorasResultado = await editoras.findOneAndDelete(id);
+      res.status(200).send({
+        message: `Editora ${editorasResultado.nome} removido com sucesso!`,
+      });
+    } catch (error) {
+      next(error);
+    }
   };
 }
 
