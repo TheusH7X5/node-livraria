@@ -1,14 +1,15 @@
 import express from "express";
 import LivroController from "../controllers/livrosControllers.js";
 import bodyParser from "body-parser";
+import paginar from "../middlewares/paginar.js";
 
 const router = express.Router();
 
 router.use(bodyParser.json());
 
 router
-  .get("/livros", LivroController.listarLivros)
-  .get("/livros/busca", LivroController.listarLivroPorEditora)
+  .get("/livros", LivroController.listarLivros, paginar)
+  .get("/livros/busca", LivroController.listarLivroPorFiltro, paginar)
   .get("/livros/:id", LivroController.listarLivroPorId)
   .post("/livros", LivroController.cadastrarLivro)
   .put("/livros/:id", LivroController.atualizarLivro)

@@ -1,10 +1,12 @@
-import {editoras} from "../models/index.js";
+import { editoras } from "../models/index.js";
 
 class EditoraController {
   static listarEditoras = async (req, res, next) => {
     try {
-      const editorasResultado = await editoras.find();
-      res.status(200).json(editorasResultado);
+      const editorasResultado = editoras.find();
+      req.resultado = editorasResultado;
+      
+      next();
     } catch (error) {
       next(error);
     }

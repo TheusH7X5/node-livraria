@@ -1,14 +1,12 @@
-import {livros} from "../models/index.js";
+import { autores, editoras, livros } from "../models/index.js";
 
 class LivroController {
   static listarLivros = async (req, res, next) => {
     try {
+      const buscaLivros = livros.find();
+      req.resultado = buscaLivros;
 
-      const livrosResultado = await livros
-        .find()
-        .populate("autor editora", "nome")
-        .exec();
-      res.status(200).json(livrosResultado);
+      next();
     } catch (error) {
       next(error);
     }
@@ -63,15 +61,62 @@ class LivroController {
     }
   };
 
-  static listarLivroPorEditora = async (req, res, next) => {
+  static listarLivroPorFiltro = async (req, res, next) => {
     try {
-      const editora = req.query.editora;
-      const response = await livros.find({ editora: editora }, {});
-      res.status(200).send(response);
+      const busca = await processoBusca(req.query);
+
+      if (busca !== null) {
+        const livrosResultado = livros.find(busca).populate("autor editora");
+
+        req.resultado = livrosResultado;
+        
+        next();
+      } else {
+        res.status(200).send([]);
+      }
     } catch (error) {
       next(error);
     }
   };
+}
+
+async function processoBusca(parametros) {
+  const { nomeEditora, titulo, minPagina, maxPagina, nomeAutor } = parametros;
+
+  let busca = {};
+
+  if (titulo) busca.titulo = { $regex: titulo, $options: "i" };
+
+  if (minPagina || maxPagina) busca.numeroPaginas = {};
+
+  if (minPagina) busca.numeroPaginas.$gte = minPagina;
+  if (maxPagina) busca.numeroPaginas.$lte = maxPagina;
+
+  if (nomeAutor) {
+    const autor = await autores.findOne({
+      nome: { $regex: nomeAutor, $options: "i" },
+    });
+
+    if (autor !== null) {
+      busca.autor = autor._id;
+    } else {
+      busca = null;
+    }
+  }
+
+  if (nomeEditora) {
+    const editora = await editoras.findOne({
+      nome: { $regex: nomeEditora, $options: "i" },
+    });
+
+    if (editora !== null) {
+      busca.editora = editora._id;
+    } else {
+      busca = null;
+    }
+  }
+
+  return busca;
 }
 
 export default LivroController;
