@@ -5,7 +5,6 @@ class ErroValidacao extends RequisicaoIncorreta {
     const mensagensError = Object.values(error.errors)
       .map((erro) => erro.message)
       .join("; ");
-    console.log(error.errors);
     super(`Os seguintes erros foram encontrados: ${mensagensError}`);
   }
 }
